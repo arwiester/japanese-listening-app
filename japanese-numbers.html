@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Japanese Number Listening Practice</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 20px;
+    }
+    
+    .container {
+      background: white;
+      border-radius: 20px;
+      padding: 40px;
+      max-width: 500px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #333;
+      font-size: 28px;
+    }
+    
+    .range-selector {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-bottom: 30px;
+    }
+    
+    .range-btn {
+      padding: 15px;
+      border: 2px solid #667eea;
+      background: white;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+      transition: all 0.3s;
+      touch-action: manipulation;
+    }
+    
+    .range-btn:hover {
+      background: #f0f0f0;
+    }
+    
+    .range-btn.active {
+      background: #667eea;
+      color: white;
+    }
+    
+    .play-area {
+      text-align: center;
+      margin: 30px 0;
+    }
+    
+    .play-btn {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      border: none;
+      background: #667eea;
+      color: white;
+      font-size: 40px;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+      transition: all 0.3s;
+      touch-action: manipulation;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .play-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+    }
+    
+    .play-btn:active {
+      transform: scale(0.95);
+    }
+    
+    .play-btn.playing {
+      background: #5568d3;
+      animation: pulse 0.5s ease-in-out;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+    
+    .input-area {
+      margin: 30px 0;
+    }
+    
+    #answer-input {
+      width: 100%;
+      padding: 20px;
+      font-size: 32px;
+      text-align: center;
+      border: 3px solid #e0e0e0;
+      border-radius: 10px;
+      transition: all 0.3s;
+      font-weight: 600;
+    }
+    
+    #answer-input:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    
+    #answer-input.correct {
+      border-color: #4caf50;
+      background: #e8f5e9;
+    }
+    
+    #answer-input.incorrect {
+      border-color: #f44336;
+      background: #ffebee;
+    }
+    
+    .replay-btn {
+      width: 100%;
+      padding: 18px;
+      margin-top: 15px;
+      font-size: 18px;
+      font-weight: 600;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s;
+      touch-action: manipulation;
+      background: #e0e0e0;
+      color: #333;
+    }
+    
+    .replay-btn:hover {
+      background: #d0d0d0;
+    }
+    
+    .hint {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 14px;
+      color: #999;
+    }
+    
+    .stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 15px;
+      margin-top: 30px;
+      padding-top: 30px;
+      border-top: 2px solid #e0e0e0;
+    }
+    
+    .stat {
+      text-align: center;
+    }
+    
+    .stat-value {
+      font-size: 36px;
+      font-weight: 700;
+      color: #667eea;
+    }
+    
+    .stat-label {
+      font-size: 12px;
+      color: #666;
+      text-transform: uppercase;
+      margin-top: 5px;
+      letter-spacing: 0.5px;
+    }
+    
+    .feedback {
+      text-align: center;
+      margin: 20px 0;
+      font-size: 20px;
+      font-weight: 600;
+      min-height: 30px;
+      transition: all 0.3s;
+    }
+    
+    .feedback.correct {
+      color: #4caf50;
+    }
+    
+    .feedback.incorrect {
+      color: #f44336;
+    }
+    
+    .reset-btn {
+      width: 100%;
+      padding: 12px;
+      margin-top: 15px;
+      font-size: 14px;
+      font-weight: 600;
+      border: 2px solid #e0e0e0;
+      background: white;
+      color: #666;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+      touch-action: manipulation;
+    }
+    
+    .reset-btn:hover {
+      border-color: #667eea;
+      color: #667eea;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        padding: 25px;
+      }
+      
+      h1 {
+        font-size: 24px;
+      }
+      
+      .play-btn {
+        width: 90px;
+        height: 90px;
+        font-size: 36px;
+      }
+      
+      #answer-input {
+        font-size: 28px;
+        padding: 18px;
+      }
+      
+      .stat-value {
+        font-size: 28px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎧 Japanese Numbers</h1>
+    
+    <div class="range-selector">
+      <button class="range-btn active" data-range="10">0-10</button>
+      <button class="range-btn" data-range="100">0-100</button>
+      <button class="range-btn" data-range="1000">0-1000</button>
+      <button class="range-btn" data-range="10000">0-10000</button>
+    </div>
+    
+    <div class="play-area">
+      <button class="play-btn" id="play-btn">▶</button>
+    </div>
+    
+    <div class="feedback" id="feedback"></div>
+    
+    <div class="input-area">
+      <input 
+        type="text" 
+        id="answer-input" 
+        inputmode="numeric" 
+        pattern="[0-9]*"
+        placeholder="Type number"
+        autocomplete="off"
+        maxlength="5"
+      >
+      <div class="hint">Answer will auto-check when complete</div>
+      <button class="replay-btn" id="replay-btn">🔊 Replay Audio</button>
+    </div>
+    
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-value" id="correct-count">0</div>
+        <div class="stat-label">Correct</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value" id="total-count">0</div>
+        <div class="stat-label">Total</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value" id="accuracy">0%</div>
+        <div class="stat-label">Accuracy</div>
+      </div>
+    </div>
+    
+    <button class="reset-btn" id="reset-btn">Reset Stats</button>
+  </div>
+
+  <script>
+    // Google Cloud TTS API Configuration
+    const GOOGLE_TTS_API_KEY = 'AIzaSyC_2dbhqx4bOHbvWcje7k2TitFqn_Hk1GY';
+    const GOOGLE_TTS_ENDPOINT = 'https://texttospeech.googleapis.com/v1/text:synthesize';
+    
+    // Available Japanese voices (Standard - Free tier)
+    const JAPANESE_VOICES = [
+      'ja-JP-Standard-A', // Female
+      'ja-JP-Standard-B', // Female
+      'ja-JP-Standard-C', // Male
+      'ja-JP-Standard-D'  // Male
+    ];
+
+    class NumberPractice {
+      constructor() {
+        this.currentNumber = null;
+        this.currentRange = 10;
+        this.correctCount = 0;
+        this.totalCount = 0;
+        this.voices = [];
+        this.hasPlayedCurrent = false;
+        this.audioCache = {}; // Cache audio to reduce API calls
+        this.useCloudTTS = true; // Use Google Cloud TTS by default
+        
+        this.init();
+      }
+      
+      init() {
+        // Load voices
+        this.loadVoices();
+        
+        // Load stats from localStorage
+        this.loadStats();
+        
+        // Event listeners
+        document.querySelectorAll('.range-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => this.setRange(e.target));
+        });
+        
+        document.getElementById('play-btn').addEventListener('click', () => this.playNumber());
+        document.getElementById('replay-btn').addEventListener('click', () => this.playNumber());
+        document.getElementById('reset-btn').addEventListener('click', () => this.resetStats());
+        
+        const input = document.getElementById('answer-input');
+        
+        // Auto-submit when user enters enough digits
+        input.addEventListener('input', (e) => {
+          // Only allow numeric input
+          e.target.value = e.target.value.replace(/[^0-9]/g, '');
+          
+          // Auto-check when length matches expected answer length
+          if (e.target.value.length > 0) {
+            const userNum = parseInt(e.target.value);
+            const expectedLength = this.currentNumber.toString().length;
+            
+            // Check if user has entered enough digits
+            if (e.target.value.length >= expectedLength) {
+              // Small delay to feel natural
+              setTimeout(() => this.checkAnswer(), 300);
+            }
+          }
+        });
+        
+        // Prevent paste of non-numeric content
+        input.addEventListener('paste', (e) => {
+          e.preventDefault();
+          const text = (e.clipboardData || window.clipboardData).getData('text');
+          const numeric = text.replace(/[^0-9]/g, '');
+          document.execCommand('insertText', false, numeric);
+        });
+        
+        // Generate first number
+        this.generateNumber();
+        
+        // Focus input on load (mobile-friendly)
+        setTimeout(() => input.focus(), 100);
+      }
+      
+      loadVoices() {
+        const synth = window.speechSynthesis;
+        
+        const setVoices = () => {
+          const allVoices = synth.getVoices();
+          this.voices = allVoices.filter(v => v.lang.startsWith('ja'));
+          
+          if (this.voices.length === 0) {
+            console.warn('No Japanese voices found');
+            // Try to find any Asian language voice as fallback
+            this.voices = allVoices.filter(v => 
+              v.lang.startsWith('zh') || 
+              v.lang.startsWith('ko')
+            );
+          }
+          
+          if (this.voices.length === 0) {
+            console.warn('No suitable voices, using system default');
+            this.voices = allVoices.slice(0, 3); // Use first 3 voices as variety
+          }
+          
+          console.log(`Loaded ${this.voices.length} voices:`, this.voices.map(v => v.name));
+        };
+        
+        setVoices();
+        
+        // Chrome needs this event
+        if (speechSynthesis.onvoiceschanged !== undefined) {
+          speechSynthesis.onvoiceschanged = setVoices;
+        }
+      }
+      
+      loadStats() {
+        const saved = localStorage.getItem('numberPracticeStats');
+        if (saved) {
+          const stats = JSON.parse(saved);
+          this.correctCount = stats.correct || 0;
+          this.totalCount = stats.total || 0;
+          this.updateStats();
+        }
+      }
+      
+      saveStats() {
+        localStorage.setItem('numberPracticeStats', JSON.stringify({
+          correct: this.correctCount,
+          total: this.totalCount
+        }));
+      }
+      
+      resetStats() {
+        if (confirm('Reset all statistics?')) {
+          this.correctCount = 0;
+          this.totalCount = 0;
+          this.updateStats();
+          this.saveStats();
+        }
+      }
+      
+      setRange(btn) {
+        document.querySelectorAll('.range-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        this.currentRange = parseInt(btn.dataset.range);
+        this.generateNumber();
+        this.clearFeedback();
+      }
+      
+      generateNumber() {
+        this.currentNumber = Math.floor(Math.random() * (this.currentRange + 1));
+        this.hasPlayedCurrent = false;
+        const input = document.getElementById('answer-input');
+        input.value = '';
+        input.className = '';
+        
+        // Update maxlength based on current range
+        input.maxLength = this.currentRange.toString().length;
+        
+        input.focus();
+        
+        console.log('Generated number:', this.currentNumber); // Debug helper
+      }
+      
+      async playNumber() {
+        if (this.currentNumber === null) return;
+        
+        if (this.useCloudTTS) {
+          await this.playCloudTTS();
+        } else {
+          this.playWebSpeechAPI();
+        }
+        
+        this.hasPlayedCurrent = true;
+      }
+      
+      playWebSpeechAPI() {
+        const synth = window.speechSynthesis;
+        synth.cancel(); // Stop any currently playing audio
+        
+        const utterance = new SpeechSynthesisUtterance(this.currentNumber.toString());
+        utterance.lang = 'ja-JP';
+        
+        // Random voice selection for variety
+        if (this.voices.length > 0) {
+          const randomVoice = this.voices[Math.floor(Math.random() * this.voices.length)];
+          utterance.voice = randomVoice;
+          console.log('Using voice:', randomVoice.name);
+        }
+        
+        // Vary rate slightly for more natural variation
+        utterance.rate = 0.75 + (Math.random() * 0.5); // 0.75 to 1.25
+        utterance.pitch = 0.9 + (Math.random() * 0.2); // 0.9 to 1.1
+        
+        // Visual feedback
+        const playBtn = document.getElementById('play-btn');
+        playBtn.classList.add('playing');
+        
+        utterance.onend = () => {
+          playBtn.classList.remove('playing');
+        };
+        
+        utterance.onerror = (e) => {
+          console.error('Speech synthesis error:', e);
+          playBtn.classList.remove('playing');
+        };
+        
+        synth.speak(utterance);
+      }
+      
+      async playCloudTTS() {
+        const playBtn = document.getElementById('play-btn');
+        playBtn.classList.add('playing');
+        
+        try {
+          // Check cache first
+          const cacheKey = `${this.currentNumber}`;
+          
+          if (this.audioCache[cacheKey]) {
+            // Play from cache
+            const audio = new Audio(this.audioCache[cacheKey]);
+            audio.play();
+            audio.onended = () => {
+              playBtn.classList.remove('playing');
+            };
+            return;
+          }
+          
+          // Select random voice for variety
+          const voiceName = JAPANESE_VOICES[Math.floor(Math.random() * JAPANESE_VOICES.length)];
+          
+          // Call Google Cloud TTS API
+          const response = await fetch(
+            `${GOOGLE_TTS_ENDPOINT}?key=${GOOGLE_TTS_API_KEY}`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                input: {
+                  text: this.currentNumber.toString()
+                },
+                voice: {
+                  languageCode: 'ja-JP',
+                  name: voiceName
+                },
+                audioConfig: {
+                  audioEncoding: 'MP3',
+                  speakingRate: 0.9 + (Math.random() * 0.3), // 0.9 to 1.2 for variety
+                  pitch: 0.0
+                }
+              })
+            }
+          );
+          
+          if (!response.ok) {
+            throw new Error(`TTS API error: ${response.status}`);
+          }
+          
+          const data = await response.json();
+          
+          // Google returns base64 encoded audio
+          const audioContent = data.audioContent;
+          const audioUrl = `data:audio/mp3;base64,${audioContent}`;
+          
+          // Cache the audio
+          this.audioCache[cacheKey] = audioUrl;
+          
+          // Play the audio
+          const audio = new Audio(audioUrl);
+          audio.play();
+          
+          audio.onended = () => {
+            playBtn.classList.remove('playing');
+          };
+          
+          audio.onerror = (e) => {
+            console.error('Audio playback error:', e);
+            playBtn.classList.remove('playing');
+          };
+          
+          console.log(`Playing with voice: ${voiceName}`);
+          
+        } catch (error) {
+          console.error('Google TTS error:', error);
+          playBtn.classList.remove('playing');
+          
+          // Fallback to Web Speech API
+          console.log('Falling back to Web Speech API');
+          this.playWebSpeechAPI();
+        }
+      }
+      
+      checkAnswer() {
+        const input = document.getElementById('answer-input');
+        const userAnswer = parseInt(input.value);
+        
+        if (input.value === '' || input.classList.contains('correct') || input.classList.contains('incorrect')) {
+          return; // Don't recheck if already checked or empty
+        }
+        
+        if (!this.hasPlayedCurrent) {
+          this.showFeedback('⚠ Play audio first', 'incorrect');
+          input.value = '';
+          setTimeout(() => this.clearFeedback(), 1500);
+          return;
+        }
+        
+        this.totalCount++;
+        
+        if (userAnswer === this.currentNumber) {
+          this.correctCount++;
+          input.className = 'correct';
+          this.showFeedback('✓ Correct!', 'correct');
+          
+          // Auto-advance after short delay
+          setTimeout(() => {
+            this.generateNumber();
+            this.playNumber(); // Auto-play next number
+            this.clearFeedback();
+          }, 1000);
+        } else {
+          input.className = 'incorrect';
+          this.showFeedback(`✗ Wrong! It was ${this.currentNumber}`, 'incorrect');
+          
+          // Show answer and reset after delay
+          setTimeout(() => {
+            this.generateNumber();
+            this.clearFeedback();
+          }, 2500);
+        }
+        
+        this.updateStats();
+        this.saveStats();
+      }
+      
+      showFeedback(message, type) {
+        const feedback = document.getElementById('feedback');
+        feedback.textContent = message;
+        feedback.className = `feedback ${type}`;
+      }
+      
+      clearFeedback() {
+        const feedback = document.getElementById('feedback');
+        feedback.textContent = '';
+        feedback.className = 'feedback';
+      }
+      
+      updateStats() {
+        document.getElementById('correct-count').textContent = this.correctCount;
+        document.getElementById('total-count').textContent = this.totalCount;
+        
+        const accuracy = this.totalCount > 0 
+          ? Math.round((this.correctCount / this.totalCount) * 100) 
+          : 0;
+        document.getElementById('accuracy').textContent = accuracy + '%';
+      }
+    }
+    
+    // Initialize app when page loads
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => new NumberPractice());
+    } else {
+      new NumberPractice();
+    }
+  </script>
+</body>
+</html>
