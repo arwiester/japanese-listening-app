@@ -41,7 +41,39 @@
       display: grid;
       grid-template-columns: repeat(2, 1fr);
       gap: 10px;
-      margin-bottom: 30px;
+      margin-bottom: 20px;
+    }
+    
+    .voice-mode-toggle {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 20px;
+      padding: 10px;
+      background: #f5f5f5;
+      border-radius: 10px;
+    }
+    
+    .voice-mode-btn {
+      padding: 12px 8px;
+      border: 2px solid #ddd;
+      background: white;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.3s;
+      touch-action: manipulation;
+    }
+    
+    .voice-mode-btn:hover {
+      background: #f0f0f0;
+    }
+    
+    .voice-mode-btn.active {
+      background: #667eea;
+      color: white;
+      border-color: #667eea;
     }
     
     .range-btn {
@@ -126,14 +158,28 @@
       border-color: #667eea;
     }
     
+    #answer-input:disabled {
+      background: #f5f5f5;
+      color: #999;
+      cursor: not-allowed;
+      border-color: #e0e0e0;
+    }
+    
     #answer-input.correct {
       border-color: #4caf50;
       background: #e8f5e9;
     }
     
     #answer-input.incorrect {
-      border-color: #f44336;
-      background: #ffebee;
+      border-color: #ff9800;
+      background: #fff3e0;
+      animation: shake 0.3s;
+    }
+    
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
     }
     
     .replay-btn {
@@ -151,8 +197,62 @@
       color: #333;
     }
     
-    .replay-btn:hover {
+    .replay-btn:hover:not(:disabled) {
       background: #d0d0d0;
+    }
+    
+    .replay-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    
+    .next-btn {
+      width: 100%;
+      padding: 18px;
+      margin-top: 10px;
+      font-size: 18px;
+      font-weight: 600;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s;
+      touch-action: manipulation;
+      background: #4caf50;
+      color: white;
+    }
+    
+    .next-btn:hover:not(:disabled) {
+      background: #45a049;
+    }
+    
+    .next-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      background: #a5d6a7;
+    }
+    
+    .show-answer-btn {
+      width: 100%;
+      padding: 14px;
+      margin-top: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      border: 2px solid #ff9800;
+      background: white;
+      color: #ff9800;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s;
+      touch-action: manipulation;
+      display: none;
+    }
+    
+    .show-answer-btn.visible {
+      display: block;
+    }
+    
+    .show-answer-btn:hover {
+      background: #fff3e0;
     }
     
     .hint {
@@ -203,7 +303,12 @@
     }
     
     .feedback.incorrect {
-      color: #f44336;
+      color: #f57c00;
+    }
+    
+    .feedback.hint {
+      color: #2196f3;
+      font-size: 16px;
     }
     
     .reset-btn {
@@ -278,9 +383,12 @@
         placeholder="Type number"
         autocomplete="off"
         maxlength="5"
+        disabled
       >
-      <div class="hint">Answer will auto-check when complete</div>
-      <button class="replay-btn" id="replay-btn">🔊 Replay Audio</button>
+      <div class="hint" id="input-hint">💡 Play the audio first!</div>
+      <button class="replay-btn" id="replay-btn" disabled>🔊 Replay Audio</button>
+      <button class="show-answer-btn" id="show-answer-btn">💡 Show Answer & Continue</button>
+      <button class="next-btn" id="next-btn" disabled>🔀 Next Random Number</button>
     </div>
     
     <div class="stats">
@@ -302,16 +410,22 @@
   </div>
 
   <script>
-    // Google Cloud TTS API Configuration
-    const GOOGLE_TTS_API_KEY = 'AIzaSyC_2dbhqx4bOHbvWcje7k2TitFqn_Hk1GY';
-    const GOOGLE_TTS_ENDPOINT = 'https://texttospeech.googleapis.com/v1/text:synthesize';
+    // Cloudflare Worker Proxy Configuration (API key is server-side now!)
+    const TTS_PROXY_URL = 'https://japanese-tts-proxy.arwiester.workers.dev';
     
-    // Available Japanese voices (Standard - Free tier)
-    const JAPANESE_VOICES = [
-      'ja-JP-Standard-A', // Female
-      'ja-JP-Standard-B', // Female
-      'ja-JP-Standard-C', // Male
-      'ja-JP-Standard-D'  // Male
+    // All voice variations in one random pool
+    const ALL_VOICES = [
+      // Young voices
+      { name: 'ja-JP-Neural2-B', pitch: 3.25, rate: 1.05, label: 'Female Young' },
+      { name: 'ja-JP-Neural2-C', pitch: 7.00, rate: 1.05, label: 'Male Young' },
+      { name: 'ja-JP-Neural2-D', pitch: 7.0, rate: 0.90, label: 'Male Young' },
+      // Adult voices
+      { name: 'ja-JP-Neural2-B', pitch: 0, rate: 1.0, label: 'Female Adult' },
+      { name: 'ja-JP-Neural2-C', pitch: 0, rate: 1.0, label: 'Male Adult' },
+      { name: 'ja-JP-Neural2-D', pitch: 0, rate: 1.0, label: 'Male Adult' },
+      // Older voices (removed Female Older - sounds weird)
+      { name: 'ja-JP-Neural2-C', pitch: -4.5, rate: 0.89, label: 'Male Older' },
+      { name: 'ja-JP-Neural2-D', pitch: -5.0, rate: 0.89, label: 'Male Older' }
     ];
 
     class NumberPractice {
@@ -320,6 +434,8 @@
         this.currentRange = 10;
         this.correctCount = 0;
         this.totalCount = 0;
+        this.attemptCount = 0; // Track attempts on current number
+        this.currentVoiceConfig = null; // Store the voice used for current number
         this.voices = [];
         this.hasPlayedCurrent = false;
         this.audioCache = {}; // Cache audio to reduce API calls
@@ -341,7 +457,9 @@
         });
         
         document.getElementById('play-btn').addEventListener('click', () => this.playNumber());
-        document.getElementById('replay-btn').addEventListener('click', () => this.playNumber());
+        document.getElementById('replay-btn').addEventListener('click', () => this.playNumber(true));
+        document.getElementById('next-btn').addEventListener('click', () => this.nextRandom());
+        document.getElementById('show-answer-btn').addEventListener('click', () => this.showAnswerAndContinue());
         document.getElementById('reset-btn').addEventListener('click', () => this.resetStats());
         
         const input = document.getElementById('answer-input');
@@ -443,14 +561,25 @@
         this.currentRange = parseInt(btn.dataset.range);
         this.generateNumber();
         this.clearFeedback();
+        
+        // Disable all interactive elements when starting new range
+        document.getElementById('answer-input').disabled = true;
+        document.getElementById('replay-btn').disabled = true;
+        document.getElementById('next-btn').disabled = true;
+        document.getElementById('input-hint').textContent = '💡 Play the audio first!';
       }
       
       generateNumber() {
         this.currentNumber = Math.floor(Math.random() * (this.currentRange + 1));
         this.hasPlayedCurrent = false;
+        this.attemptCount = 0; // Reset attempts
+        
         const input = document.getElementById('answer-input');
         input.value = '';
         input.className = '';
+        
+        // Hide show answer button
+        document.getElementById('show-answer-btn').classList.remove('visible');
         
         // Update maxlength based on current range
         input.maxLength = this.currentRange.toString().length;
@@ -460,16 +589,48 @@
         console.log('Generated number:', this.currentNumber); // Debug helper
       }
       
-      async playNumber() {
+      nextRandom() {
+        // Generate a new number different from current one
+        let newNumber;
+        do {
+          newNumber = Math.floor(Math.random() * (this.currentRange + 1));
+        } while (newNumber === this.currentNumber && this.currentRange > 0);
+        
+        this.currentNumber = newNumber;
+        this.hasPlayedCurrent = false;
+        
+        const input = document.getElementById('answer-input');
+        input.value = '';
+        input.className = '';
+        input.focus();
+        
+        this.clearFeedback();
+        
+        console.log('Next random number:', this.currentNumber);
+        
+        // Auto-play the new number
+        this.playNumber();
+      }
+      
+      async playNumber(replay = false) {
         if (this.currentNumber === null) return;
         
         if (this.useCloudTTS) {
-          await this.playCloudTTS();
+          await this.playCloudTTS(replay);
         } else {
           this.playWebSpeechAPI();
         }
         
         this.hasPlayedCurrent = true;
+        
+        // Enable all interactive elements after first play
+        const input = document.getElementById('answer-input');
+        input.disabled = false;
+        input.focus();
+        
+        document.getElementById('replay-btn').disabled = false;
+        document.getElementById('next-btn').disabled = false;
+        document.getElementById('input-hint').textContent = 'Answer will auto-check when complete';
       }
       
       playWebSpeechAPI() {
@@ -486,9 +647,9 @@
           console.log('Using voice:', randomVoice.name);
         }
         
-        // Vary rate slightly for more natural variation
-        utterance.rate = 0.75 + (Math.random() * 0.5); // 0.75 to 1.25
-        utterance.pitch = 0.9 + (Math.random() * 0.2); // 0.9 to 1.1
+        // Use consistent rate and pitch (no randomization)
+        utterance.rate = 1.0;
+        utterance.pitch = 1.0;
         
         // Visual feedback
         const playBtn = document.getElementById('play-btn');
@@ -506,13 +667,22 @@
         synth.speak(utterance);
       }
       
-      async playCloudTTS() {
+      async playCloudTTS(replay = false) {
         const playBtn = document.getElementById('play-btn');
         playBtn.classList.add('playing');
         
         try {
-          // Check cache first
-          const cacheKey = `${this.currentNumber}`;
+          // Use stored voice config for replays, otherwise pick new random voice
+          let voiceConfig;
+          if (replay && this.currentVoiceConfig) {
+            voiceConfig = this.currentVoiceConfig;
+          } else {
+            voiceConfig = ALL_VOICES[Math.floor(Math.random() * ALL_VOICES.length)];
+            this.currentVoiceConfig = voiceConfig; // Store for potential replays
+          }
+          
+          // Create cache key that includes voice config
+          const cacheKey = `${this.currentNumber}_${voiceConfig.name}_${voiceConfig.pitch}`;
           
           if (this.audioCache[cacheKey]) {
             // Play from cache
@@ -521,39 +691,26 @@
             audio.onended = () => {
               playBtn.classList.remove('playing');
             };
+            console.log(`Playing cached: ${voiceConfig.label}`);
             return;
           }
           
-          // Select random voice for variety
-          const voiceName = JAPANESE_VOICES[Math.floor(Math.random() * JAPANESE_VOICES.length)];
-          
-          // Call Google Cloud TTS API
-          const response = await fetch(
-            `${GOOGLE_TTS_ENDPOINT}?key=${GOOGLE_TTS_API_KEY}`,
-            {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                input: {
-                  text: this.currentNumber.toString()
-                },
-                voice: {
-                  languageCode: 'ja-JP',
-                  name: voiceName
-                },
-                audioConfig: {
-                  audioEncoding: 'MP3',
-                  speakingRate: 0.9 + (Math.random() * 0.3), // 0.9 to 1.2 for variety
-                  pitch: 0.0
-                }
-              })
-            }
-          );
+          // Call Cloudflare Worker proxy (API key is server-side!)
+          const response = await fetch(TTS_PROXY_URL, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              text: this.currentNumber.toString(),
+              voiceName: voiceConfig.name,
+              rate: voiceConfig.rate,
+              pitch: voiceConfig.pitch
+            })
+          });
           
           if (!response.ok) {
-            throw new Error(`TTS API error: ${response.status}`);
+            throw new Error(`Proxy error: ${response.status}`);
           }
           
           const data = await response.json();
@@ -578,10 +735,10 @@
             playBtn.classList.remove('playing');
           };
           
-          console.log(`Playing with voice: ${voiceName}`);
+          console.log(`Playing: ${voiceConfig.label} (pitch: ${voiceConfig.pitch}, rate: ${voiceConfig.rate})`);
           
         } catch (error) {
-          console.error('Google TTS error:', error);
+          console.error('TTS Proxy error:', error);
           playBtn.classList.remove('playing');
           
           // Fallback to Web Speech API
@@ -594,43 +751,79 @@
         const input = document.getElementById('answer-input');
         const userAnswer = parseInt(input.value);
         
-        if (input.value === '' || input.classList.contains('correct') || input.classList.contains('incorrect')) {
-          return; // Don't recheck if already checked or empty
+        if (input.value === '') {
+          return;
         }
         
         if (!this.hasPlayedCurrent) {
-          this.showFeedback('⚠ Play audio first', 'incorrect');
+          this.showFeedback('💡 Play the audio first!', 'hint');
           input.value = '';
           setTimeout(() => this.clearFeedback(), 1500);
           return;
         }
         
-        this.totalCount++;
-        
         if (userAnswer === this.currentNumber) {
+          // Correct! Show brief green flash
           this.correctCount++;
+          this.totalCount++;
           input.className = 'correct';
-          this.showFeedback('✓ Correct!', 'correct');
           
-          // Auto-advance after short delay
+          // Brief pause for positive feedback, then move on
           setTimeout(() => {
+            this.updateStats();
+            this.saveStats();
             this.generateNumber();
-            this.playNumber(); // Auto-play next number
-            this.clearFeedback();
-          }, 1000);
+            this.playNumber();
+          }, 400); // 400ms green flash
+          
         } else {
+          // Wrong attempt - replay audio automatically and let them try again
+          this.attemptCount++;
           input.className = 'incorrect';
-          this.showFeedback(`✗ Wrong! It was ${this.currentNumber}`, 'incorrect');
           
-          // Show answer and reset after delay
+          // Encouraging feedback based on attempt count
+          const encouragements = [
+            '🤔 Try again!',
+            '💪 Keep going!',
+            '👂 Listen carefully and try once more!'
+          ];
+          
+          const message = encouragements[Math.min(this.attemptCount - 1, encouragements.length - 1)];
+          this.showFeedback(message, 'incorrect');
+          
+          // Auto-replay the SAME audio to help them (replay = true)
+          this.playNumber(true);
+          
+          // Clear input IMMEDIATELY so they can retry right away
+          input.value = '';
+          input.focus();
+          
+          // Remove visual feedback after delay
           setTimeout(() => {
-            this.generateNumber();
+            input.className = '';
             this.clearFeedback();
-          }, 2500);
+          }, 1200);
+          
+          // Show "Show Answer" button after 2 attempts
+          if (this.attemptCount >= 2) {
+            document.getElementById('show-answer-btn').classList.add('visible');
+          }
         }
-        
+      }
+      
+      showAnswerAndContinue() {
+        // User gave up - count as incorrect but move on
+        this.totalCount++;
         this.updateStats();
         this.saveStats();
+        
+        this.showFeedback(`The answer was: ${this.currentNumber}`, 'hint');
+        
+        setTimeout(() => {
+          this.generateNumber();
+          this.playNumber();
+          this.clearFeedback();
+        }, 2000);
       }
       
       showFeedback(message, type) {
