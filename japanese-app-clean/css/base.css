@@ -1,0 +1,67 @@
+/**
+ * Base Styles - Resets & Layout
+ */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-family);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+  padding: var(--space-lg);
+}
+
+.container {
+  background: var(--bg-surface);
+  border-radius: var(--radius-lg);
+  padding: var(--space-2xl);
+  max-width: var(--container-max-width);
+  width: 100%;
+  box-shadow: var(--shadow-lg);
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: var(--space-xl);
+  color: var(--text-primary);
+  font-size: var(--font-size-xl);
+}
+
+/* Animations */
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  body {
+    padding: var(--space-md);
+  }
+  
+  .container {
+    padding: var(--space-lg);
+  }
+  
+  h1 {
+    font-size: var(--font-size-lg);
+  }
+}

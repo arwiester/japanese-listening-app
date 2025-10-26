@@ -25,7 +25,7 @@ class CORSRequestHandler(Handler):
 
 with socketserver.TCPServer(("", PORT), CORSRequestHandler) as httpd:
     print(f"✅ Server running at http://localhost:{PORT}")
-    print(f"📱 Open this URL in your browser: http://localhost:{PORT}/japanese-numbers.html")
+    print(f"📱 Open this URL in your browser: http://localhost:{PORT}")
     print(f"⏹️  Press Ctrl+C to stop")
     try:
         httpd.serve_forever()
