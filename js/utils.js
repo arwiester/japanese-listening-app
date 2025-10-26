@@ -22,9 +22,10 @@ export function getRandomElement(array) {
 export function debounce(func, wait) {
   let timeout;
   return function executedFunction(...args) {
+    const context = this; // Preserve 'this' context
     const later = () => {
       clearTimeout(timeout);
-      func(...args);
+      func.apply(context, args); // Apply with proper context
     };
     clearTimeout(timeout);
     timeout = setTimeout(later, wait);

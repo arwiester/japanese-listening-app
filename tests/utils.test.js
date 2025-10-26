@@ -123,4 +123,21 @@ describe('debounce', () => {
     await new Promise(resolve => setTimeout(resolve, 100));
     expect(result).toBe('helloworld');
   });
+
+  it('should preserve "this" context', async () => {
+    const testObject = {
+      value: 42,
+      debouncedMethod: null
+    };
+    
+    let capturedValue = null;
+    testObject.debouncedMethod = debounce(function() {
+      capturedValue = this.value;
+    }, 50);
+
+    testObject.debouncedMethod();
+
+    await new Promise(resolve => setTimeout(resolve, 100));
+    expect(capturedValue).toBe(42);
+  });
 });

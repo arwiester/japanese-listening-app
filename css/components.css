@@ -11,15 +11,17 @@
 }
 
 .range-btn {
-  padding: var(--space-md);
+  padding: 18px 28px;
   border: 2px solid var(--accent-primary);
   background: var(--bg-surface);
   border-radius: var(--radius-md);
   cursor: pointer;
-  font-size: var(--font-size-md);
+  font-size: 1.4rem;
   font-weight: 600;
   transition: all var(--transition-base);
   touch-action: manipulation;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
 }
 
 .range-btn:hover {
@@ -293,6 +295,11 @@
 @media (max-width: 768px) {
   .range-selector {
     grid-template-columns: 1fr;
+  }
+  
+  .range-btn {
+    font-size: 1.3rem;
+    padding: 16px 24px;
   }
   
   .voice-mode-toggle {
