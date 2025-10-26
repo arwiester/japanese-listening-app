@@ -1,39 +1,29 @@
 /**
- * Currency Practice Module
- * Practice listening to Japanese currency amounts (円)
+ * CurrencyPractice - Currency listening practice
  */
 
+import BasePractice from './BasePractice.js';
 import { getRandomNumber } from './utils.js';
-import AudioService from './audioService.js';
 
-export default class CurrencyPractice {
+class CurrencyPractice extends BasePractice {
   constructor() {
+    super(); // Call parent constructor
+    
+    // Currency-specific state
     this.currentAmount = 0;
-    this.currentRange = 999; // Start with convenience store range
-    this.audioService = new AudioService(); // Instantiate audio service
-    this.hasPlayedCurrent = false;
-    this.attemptCount = 0;
-    this.stats = {
-      correct: 0,
-      total: 0
-    };
-    this.elements = {};
+    this.currentRange = 999;
   }
 
-  /**
-   * Initialize the currency practice
-   */
   async init() {
-    await this.audioService.initWebSpeechVoices(); // Initialize voices
     this.cacheElements();
-    this.attachEventListeners();
+    await this.initServices(); // From BasePractice
+    this.setupEventListeners();
+    this.updateStats();
     this.generateAmount();
+    
     console.log('Currency Practice initialized');
   }
 
-  /**
-   * Cache DOM elements
-   */
   cacheElements() {
     this.elements = {
       answerInput: document.getElementById('answer-input'),
@@ -49,15 +39,14 @@ export default class CurrencyPractice {
     };
   }
 
-  /**
-   * Attach event listeners
-   */
-  attachEventListeners() {
-    // Range selection
+  setupEventListeners() {
+    // Range selection with button locking
     this.elements.rangeBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        const range = parseInt(btn.dataset.range);
-        this.setRange(range);
+      btn.addEventListener('click', async (e) => {
+        await this.handleAudioAction(
+          this.elements.rangeBtns,
+          () => this.setRange(parseInt(e.target.dataset.range))
+        );
       });
     });
 
@@ -70,35 +59,20 @@ export default class CurrencyPractice {
     });
 
     // Replay button
-    this.elements.replayBtn.addEventListener('click', () => {
-      this.playAmount();
-    });
+    this.elements.replayBtn.addEventListener('click', () => this.playAmount());
 
     // Show answer button
-    this.elements.showAnswerBtn.addEventListener('click', () => {
-      this.showAnswerAndContinue();
-    });
+    this.elements.showAnswerBtn.addEventListener('click', () => this.showAnswerAndContinue());
 
     // Reset stats
-    this.elements.resetBtn.addEventListener('click', () => {
-      this.resetStats();
-    });
+    this.elements.resetBtn.addEventListener('click', () => this.resetStats());
   }
 
-  /**
-   * Set currency range
-   */
-  setRange(range) {
+  async setRange(range) {
     this.currentRange = range;
-    
-    // Update active button
-    this.elements.rangeBtns.forEach(btn => {
-      btn.classList.toggle('active', parseInt(btn.dataset.range) === range);
-    });
-    
-    // Generate new amount and auto-play
+    this.setActiveButton(this.elements.rangeBtns, range);
     this.generateAmount();
-    this.playAmount();
+    await this.playAmount();
   }
 
   /**
@@ -107,18 +81,11 @@ export default class CurrencyPractice {
   generateAmount() {
     // Generate realistic amounts based on range
     if (this.currentRange === 999) {
-      // ¥1-¥999 - convenience store transactions (any total possible)
+      // ¥1-¥999 - convenience store transactions
       this.currentAmount = getRandomNumber(1, 999);
     } else {
       const min = Math.floor(this.currentRange / 10);
       this.currentAmount = getRandomNumber(min, this.currentRange);
-      
-      // Round to realistic amounts for larger ranges
-      if (this.currentRange >= 10000) {
-        this.currentAmount = Math.round(this.currentAmount / 100) * 100;
-      } else if (this.currentRange >= 1000) {
-        this.currentAmount = Math.round(this.currentAmount / 10) * 10;
-      }
     }
     
     this.hasPlayedCurrent = false;
@@ -162,8 +129,7 @@ export default class CurrencyPractice {
       
     } catch (error) {
       console.error('Audio playback failed:', error);
-      this.elements.feedback.textContent = '⚠️ Audio failed. Try again.';
-      this.elements.feedback.className = 'feedback incorrect';
+      this.showFeedback('⚠️ Audio failed. Try again.', 'incorrect');
     }
   }
 
@@ -180,10 +146,8 @@ export default class CurrencyPractice {
     this.attemptCount++;
     
     if (userNumber === this.currentAmount) {
-      // Correct!
       this.handleCorrectAnswer();
     } else if (userAnswer.length >= this.currentAmount.toString().length) {
-      // Wrong length = wrong answer
       this.handleIncorrectAnswer();
     }
   }
@@ -192,12 +156,11 @@ export default class CurrencyPractice {
    * Handle correct answer
    */
   handleCorrectAnswer() {
-    this.stats.correct++;
-    this.stats.total++;
+    // Use statsService from base class
+    this.statsService.incrementCorrect();
     
     this.elements.answerInput.className = 'answer-input correct';
-    this.elements.feedback.textContent = '✓ Correct!';
-    this.elements.feedback.className = 'feedback correct';
+    this.showFeedback('✓ Correct!', 'correct');
     
     this.updateStats();
     
@@ -205,7 +168,7 @@ export default class CurrencyPractice {
     setTimeout(() => {
       this.generateAmount();
       this.playAmount();
-      this.elements.feedback.textContent = '';
+      this.clearFeedback();
     }, 1500);
   }
 
@@ -213,11 +176,14 @@ export default class CurrencyPractice {
    * Handle incorrect answer
    */
   handleIncorrectAnswer() {
-    this.stats.total++;
+    // Use statsService from base class
+    this.statsService.incrementTotal();
     
     this.elements.answerInput.className = 'answer-input incorrect';
-    this.elements.feedback.textContent = `✗ Incorrect. The answer was ¥${this.currentAmount.toLocaleString()}`;
-    this.elements.feedback.className = 'feedback incorrect';
+    this.showFeedback(
+      `✗ Incorrect. The answer was ¥${this.currentAmount.toLocaleString()}`,
+      'incorrect'
+    );
     
     this.updateStats();
     
@@ -235,30 +201,11 @@ export default class CurrencyPractice {
     setTimeout(() => {
       this.generateAmount();
       this.playAmount();
-      this.elements.feedback.textContent = '';
+      this.clearFeedback();
       this.elements.showAnswerBtn.classList.remove('visible');
     }, 1000);
   }
 
-  /**
-   * Update statistics display
-   */
-  updateStats() {
-    this.elements.correctCount.textContent = this.stats.correct;
-    this.elements.totalCount.textContent = this.stats.total;
-    
-    const accuracy = this.stats.total > 0 
-      ? Math.round((this.stats.correct / this.stats.total) * 100)
-      : 0;
-    this.elements.accuracy.textContent = `${accuracy}%`;
-  }
-
-  /**
-   * Reset statistics
-   */
-  resetStats() {
-    this.stats = { correct: 0, total: 0 };
-    this.updateStats();
-    this.elements.feedback.textContent = '';
-  }
 }
+
+export default CurrencyPractice;

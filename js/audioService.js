@@ -10,6 +10,8 @@ class AudioService {
     this.audioCache = {};
     this.currentVoiceConfig = null;
     this.japaneseVoices = [];
+    this.currentAudio = null;
+    this.playbackLock = false;
   }
 
   /**
@@ -32,65 +34,110 @@ class AudioService {
   }
 
   /**
+   * Stop any currently playing audio
+   */
+  stop() {
+    // Stop HTML5 Audio
+    if (this.currentAudio) {
+      this.currentAudio.pause();
+      this.currentAudio.currentTime = 0;
+      this.currentAudio = null;
+    }
+    
+    // Stop Web Speech API
+    if ('speechSynthesis' in window && window.speechSynthesis.speaking) {
+      window.speechSynthesis.cancel();
+    }
+    
+    this.playbackLock = false;
+  }
+
+  /**
    * Play number using Cloud TTS (Google Neural2)
    */
   async playCloudTTS(number, replay = false) {
-    // Use stored voice config for replays, otherwise pick new random voice
-    let voiceConfig;
-    if (replay && this.currentVoiceConfig) {
-      voiceConfig = this.currentVoiceConfig;
-    } else {
-      voiceConfig = getRandomElement(ALL_VOICES);
-      this.currentVoiceConfig = voiceConfig;
-    }
-
-    // Create cache key that includes voice config
-    const cacheKey = `${number}_${voiceConfig.name}_${voiceConfig.pitch}`;
-
-    // Check cache first
-    if (this.audioCache[cacheKey]) {
-      await this.playFromCache(cacheKey);
-      console.log(`Playing cached: ${voiceConfig.label}`);
+    // CRITICAL: Check and set lock atomically
+    if (this.playbackLock) {
+      console.log('🔒 Playback locked, ignoring request');
       return;
     }
-
-    // Fetch from Cloudflare Worker
-    const response = await fetch(TTS_PROXY_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        text: number.toString(),
-        voiceName: voiceConfig.name,
-        rate: voiceConfig.rate,
-        pitch: voiceConfig.pitch
-      })
-    });
-
-    if (!response.ok) {
-      throw new Error(`Proxy error: ${response.status}`);
-    }
-
-    const data = await response.json();
-    const audioUrl = `data:audio/mp3;base64,${data.audioContent}`;
-
-    // Cache the audio
-    this.audioCache[cacheKey] = audioUrl;
-
-    // Play the audio
-    await this.playAudio(audioUrl);
     
-    console.log(`Playing: ${voiceConfig.label} (pitch: ${voiceConfig.pitch}, rate: ${voiceConfig.rate})`);
+    this.playbackLock = true;
+    this.stop(); // Stop any existing audio
+    
+    try {
+      // Use stored voice config for replays, otherwise pick new random voice
+      let voiceConfig;
+      if (replay && this.currentVoiceConfig) {
+        voiceConfig = this.currentVoiceConfig;
+      } else {
+        voiceConfig = getRandomElement(ALL_VOICES);
+        this.currentVoiceConfig = voiceConfig;
+      }
+
+      // Create cache key that includes voice config
+      const cacheKey = `${number}_${voiceConfig.name}_${voiceConfig.pitch}`;
+
+      // Check cache first
+      if (this.audioCache[cacheKey]) {
+        await this.playFromCache(cacheKey);
+        console.log(`Playing cached: ${voiceConfig.label}`);
+        return;
+      }
+
+      // Fetch from Cloudflare Worker
+      const response = await fetch(TTS_PROXY_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          text: number.toString(),
+          voiceName: voiceConfig.name,
+          rate: voiceConfig.rate,
+          pitch: voiceConfig.pitch
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Proxy error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const audioUrl = `data:audio/mp3;base64,${data.audioContent}`;
+
+      // Cache the audio
+      this.audioCache[cacheKey] = audioUrl;
+
+      // Play the audio
+      await this.playAudio(audioUrl);
+      
+      console.log(`Playing: ${voiceConfig.label} (pitch: ${voiceConfig.pitch}, rate: ${voiceConfig.rate})`);
+      
+    } catch (error) {
+      console.error('Playback error:', error);
+      throw error;
+    } finally {
+      // CRITICAL: Always release lock
+      this.playbackLock = false;
+    }
   }
 
   /**
    * Play number using Web Speech API
    */
-  playWebSpeechAPI(number) {
+  async playWebSpeechAPI(number) {
+    // CRITICAL: Check and set lock atomically
+    if (this.playbackLock) {
+      console.log('🔒 Playback locked, ignoring request');
+      return;
+    }
+    
+    this.playbackLock = true;
+    this.stop(); // Stop any existing audio
+    
     return new Promise((resolve, reject) => {
       const synth = window.speechSynthesis;
-      synth.cancel(); // Stop any currently playing audio
 
       const utterance = new SpeechSynthesisUtterance(number.toString());
       utterance.lang = 'ja-JP';
@@ -104,8 +151,15 @@ class AudioService {
         console.log('Using voice:', randomVoice.name);
       }
 
-      utterance.onend = resolve;
-      utterance.onerror = reject;
+      utterance.onend = () => {
+        this.playbackLock = false;
+        resolve();
+      };
+      
+      utterance.onerror = (error) => {
+        this.playbackLock = false;
+        reject(error);
+      };
 
       synth.speak(utterance);
     });
@@ -117,9 +171,22 @@ class AudioService {
   playAudio(url) {
     return new Promise((resolve, reject) => {
       const audio = new Audio(url);
-      audio.onended = resolve;
-      audio.onerror = reject;
-      audio.play().catch(reject);
+      this.currentAudio = audio;
+      
+      audio.onended = () => {
+        this.currentAudio = null;
+        resolve();
+      };
+      
+      audio.onerror = (error) => {
+        this.currentAudio = null;
+        reject(error);
+      };
+      
+      audio.play().catch((error) => {
+        this.currentAudio = null;
+        reject(error);
+      });
     });
   }
 

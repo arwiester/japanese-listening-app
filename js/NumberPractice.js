@@ -1,7 +1,8 @@
 /**
- * NumberPractice - Main Application Class
+ * NumberPractice - Numbers listening practice
  */
 
+import BasePractice from './BasePractice.js';
 import {
   DIFFICULTY_RANGES,
   ENCOURAGEMENT_MESSAGES,
@@ -11,87 +12,56 @@ import {
   TIMINGS,
   ATTEMPTS_BEFORE_HINT
 } from './config.js';
-import AudioService from './audioService.js';
-import StatsService from './statsService.js';
 import { getRandomNumber, debounce } from './utils.js';
 
-class NumberPractice {
+class NumberPractice extends BasePractice {
   constructor() {
-    // State
+    super(); // Call parent constructor
+    
+    // Number-specific state
     this.currentNumber = null;
     this.currentRange = DEFAULTS.RANGE;
-    this.attemptCount = 0;
-    this.hasPlayedCurrent = false;
     this.voiceMode = DEFAULTS.VOICE_MODE;
-    
-    // Services
-    this.audioService = new AudioService();
-    this.statsService = new StatsService();
-    
-    // DOM elements (cached)
-    this.elements = {};
   }
 
-  /**
-   * Initialize the application
-   */
   async init() {
-    // Cache DOM elements
     this.cacheElements();
-    
-    // Initialize services
-    await this.audioService.initWebSpeechVoices();
-    this.statsService.loadStats();
+    await this.initServices(); // From BasePractice
     this.loadVoiceMode();
-    
-    // Set up event listeners
     this.setupEventListeners();
-    
-    // Initialize UI
     this.updateStats();
-    this.setActiveRangeButton(this.currentRange);
+    this.setActiveButton(this.elements.rangeBtns, this.currentRange);
     this.setActiveVoiceModeButton(this.voiceMode);
     this.generateNumber();
     
     console.log('Japanese Number Practice initialized');
   }
 
-  /**
-   * Cache frequently accessed DOM elements
-   */
   cacheElements() {
     this.elements = {
-      // Buttons
       replayBtn: document.getElementById('replay-btn'),
-      // nextBtn: document.getElementById('next-btn'),
       showAnswerBtn: document.getElementById('show-answer-btn'),
       resetBtn: document.getElementById('reset-btn'),
-      
-      // Input
       answerInput: document.getElementById('answer-input'),
       inputHint: document.getElementById('input-hint'),
-      
-      // Stats
       correctCount: document.getElementById('correct-count'),
       totalCount: document.getElementById('total-count'),
       accuracy: document.getElementById('accuracy'),
-      
-      // Feedback
       feedback: document.getElementById('feedback'),
-      
-      // Selectors
       rangeBtns: document.querySelectorAll('.range-btn'),
       voiceModeBtns: document.querySelectorAll('.voice-mode-btn')
     };
   }
 
-  /**
-   * Set up all event listeners
-   */
   setupEventListeners() {
-    // Range selection
+    // Range selection with button locking - NOW CLEAN
     this.elements.rangeBtns.forEach(btn => {
-      btn.addEventListener('click', (e) => this.setRange(parseInt(e.target.dataset.range)));
+      btn.addEventListener('click', async (e) => {
+        await this.handleAudioAction(
+          this.elements.rangeBtns,
+          () => this.setRange(parseInt(e.target.dataset.range))
+        );
+      });
     });
     
     // Voice mode selection
@@ -101,11 +71,10 @@ class NumberPractice {
     
     // Play buttons
     this.elements.replayBtn.addEventListener('click', () => this.playNumber(true));
-    // this.elements.nextBtn.addEventListener('click', () => this.nextRandom());
     this.elements.showAnswerBtn.addEventListener('click', () => this.showAnswerAndContinue());
     this.elements.resetBtn.addEventListener('click', () => this.resetStats());
     
-    // Input handling with debounce - FIXED: Use currentNumber length instead of currentRange
+    // Input handling with debounce
     this.elements.answerInput.addEventListener('input', debounce(() => {
       const expectedLength = this.currentNumber.toString().length;
       if (this.elements.answerInput.value.length >= expectedLength) {
@@ -114,14 +83,11 @@ class NumberPractice {
     }, 100));
   }
 
-  /**
-   * Set difficulty range
-   */
-  setRange(range) {
+  async setRange(range) {
     this.currentRange = range;
-    this.setActiveRangeButton(range);
+    this.setActiveButton(this.elements.rangeBtns, range);
     this.generateNumber();
-    this.playNumber(); // Auto-play when range selected
+    await this.playNumber();
     this.clearFeedback();
   }
 

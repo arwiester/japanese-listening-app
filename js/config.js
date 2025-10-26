@@ -8,9 +8,9 @@ export const TTS_PROXY_URL = 'https://japanese-tts-proxy.arwiester.workers.dev';
 // Voice configurations - 8 variations for natural variety
 export const ALL_VOICES = [
   // Young voices
-  { name: 'ja-JP-Neural2-B', pitch: 3.25, rate: 1.05, label: 'Female Young' },
-  { name: 'ja-JP-Neural2-C', pitch: 7.00, rate: 1.05, label: 'Male Young' },
-  { name: 'ja-JP-Neural2-D', pitch: 7.0, rate: 0.90, label: 'Male Young' },
+  { name: 'ja-JP-Neural2-B', pitch: 2.25, rate: 1.05, label: 'Female Young' },
+  { name: 'ja-JP-Neural2-C', pitch: 5.00, rate: 1.05, label: 'Male Young' },
+  { name: 'ja-JP-Neural2-D', pitch: 4.0, rate: 0.90, label: 'Male Young' },
   
   // Adult voices
   { name: 'ja-JP-Neural2-B', pitch: 0, rate: 1.0, label: 'Female Adult' },

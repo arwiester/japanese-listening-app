@@ -133,11 +133,19 @@ describe('CurrencyPractice - Core Functionality', () => {
       expect(app.currentAmount).toBeLessThanOrEqual(1000000);
     });
 
-    it('should round large amounts appropriately', () => {
+    it('should generate unrounded amounts for large ranges', () => {
       app.currentRange = 100000;
-      app.generateAmount();
-      // Should be rounded to nearest 100
-      expect(app.currentAmount % 100).toBe(0);
+      
+      // Generate multiple amounts and check for non-rounded values
+      const amounts = [];
+      for (let i = 0; i < 20; i++) {
+        app.generateAmount();
+        amounts.push(app.currentAmount);
+      }
+      
+      // At least some amounts should NOT be divisible by 100 (proving no rounding)
+      const hasUnroundedAmounts = amounts.some(amt => amt % 100 !== 0);
+      expect(hasUnroundedAmounts).toBe(true);
     });
 
     it('should set maxLength to match range length', () => {
@@ -230,19 +238,19 @@ describe('CurrencyPractice - Core Functionality', () => {
     });
 
     it('should increment correct count', () => {
-      const initialCorrect = app.stats.correct;
+      const initialCorrect = app.statsService.correctCount;
       
       app.handleCorrectAnswer();
       
-      expect(app.stats.correct).toBe(initialCorrect + 1);
+      expect(app.statsService.correctCount).toBe(initialCorrect + 1);
     });
 
     it('should increment total count', () => {
-      const initialTotal = app.stats.total;
+      const initialTotal = app.statsService.totalCount;
       
       app.handleCorrectAnswer();
       
-      expect(app.stats.total).toBe(initialTotal + 1);
+      expect(app.statsService.totalCount).toBe(initialTotal + 1);
     });
 
     it('should apply correct styling', () => {
@@ -266,11 +274,11 @@ describe('CurrencyPractice - Core Functionality', () => {
     });
 
     it('should increment total count', () => {
-      const initialTotal = app.stats.total;
+      const initialTotal = app.statsService.totalCount;
       
       app.handleIncorrectAnswer();
       
-      expect(app.stats.total).toBe(initialTotal + 1);
+      expect(app.statsService.totalCount).toBe(initialTotal + 1);
     });
 
     it('should apply incorrect styling', () => {
@@ -299,8 +307,8 @@ describe('CurrencyPractice - Core Functionality', () => {
     });
 
     it('should calculate accuracy correctly', () => {
-      app.stats.correct = 7;
-      app.stats.total = 10;
+      app.statsService.correctCount = 7;
+      app.statsService.totalCount = 10;
       
       app.updateStats();
       
@@ -308,8 +316,8 @@ describe('CurrencyPractice - Core Functionality', () => {
     });
 
     it('should handle 100% accuracy', () => {
-      app.stats.correct = 10;
-      app.stats.total = 10;
+      app.statsService.correctCount = 10;
+      app.statsService.totalCount = 10;
       
       app.updateStats();
       
@@ -317,8 +325,8 @@ describe('CurrencyPractice - Core Functionality', () => {
     });
 
     it('should handle 0% accuracy', () => {
-      app.stats.correct = 0;
-      app.stats.total = 10;
+      app.statsService.correctCount = 0;
+      app.statsService.totalCount = 10;
       
       app.updateStats();
       
@@ -326,8 +334,8 @@ describe('CurrencyPractice - Core Functionality', () => {
     });
 
     it('should handle division by zero', () => {
-      app.stats.correct = 0;
-      app.stats.total = 0;
+      app.statsService.correctCount = 0;
+      app.statsService.totalCount = 0;
       
       app.updateStats();
       
@@ -335,13 +343,17 @@ describe('CurrencyPractice - Core Functionality', () => {
     });
 
     it('should reset stats correctly', () => {
-      app.stats.correct = 5;
-      app.stats.total = 10;
+      app.statsService.correctCount = 5;
+      app.statsService.totalCount = 10;
+      
+      // Mock window.confirm to auto-accept
+      global.confirm = () => true;
       
       app.resetStats();
       
-      expect(app.stats.correct).toBe(0);
-      expect(app.stats.total).toBe(0);
+      const stats = app.statsService.getStats();
+      expect(stats.correct).toBe(0);
+      expect(stats.total).toBe(0);
     });
   });
 
