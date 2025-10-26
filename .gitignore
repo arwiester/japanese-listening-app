@@ -25,3 +25,8 @@ Thumbs.db
 # Environment
 .env
 .env.local
+
+# Development docs
+REFACTOR_SUMMARY.md
+HANDOFF*.md
+*_NOTES.md

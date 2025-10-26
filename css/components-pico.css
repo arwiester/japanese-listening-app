@@ -1,0 +1,206 @@
+/**
+ * Custom Components
+ * App-specific styling that Pico.css doesn't cover
+ */
+
+/* ===== Container Card ===== */
+.container {
+  background: var(--pico-background-color);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  box-shadow: var(--shadow-lg);
+  width: 100%;
+  max-width: var(--container-max-width);
+}
+
+/* ===== Range Selector Buttons ===== */
+.range-selector {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.range-btn {
+  padding: 1.2rem 1.8rem;
+  border: 2px solid var(--pico-primary);
+  background: transparent;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-size: 1.1rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  color: var(--pico-primary) !important; /* Force color for inactive buttons */
+}
+
+.range-btn:hover {
+  background: var(--pico-primary-focus);
+  color: var(--pico-primary) !important;
+  transform: translateY(-1px);
+}
+
+.range-btn.active {
+  background: var(--pico-primary);
+  color: white !important; /* Force white text for active button */
+  border-color: var(--pico-primary);
+}
+
+/* ===== Input Area ===== */
+.input-area {
+  margin: 2rem 0;
+}
+
+.answer-input {
+  font-size: 1.5rem;
+  text-align: center;
+  padding: 1rem;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.answer-input::placeholder {
+  color: var(--pico-muted-color);
+  opacity: 0.8;
+  font-weight: 500;
+}
+
+.answer-input:disabled {
+  opacity: 1 !important; /* Override Pico's default */
+  background-color: var(--pico-form-element-background-color);
+  border: 2px solid var(--pico-muted-border-color);
+  cursor: not-allowed;
+}
+
+.answer-input:disabled::placeholder {
+  color: var(--pico-muted-color);
+  opacity: 0.6;
+}
+
+.answer-input.correct {
+  border-color: var(--success);
+  background: var(--success-bg);
+}
+
+.answer-input.incorrect {
+  border-color: var(--warning);
+  background: var(--warning-bg);
+  animation: shake 0.3s;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-10px); }
+  75% { transform: translateX(10px); }
+}
+
+.hint {
+  text-align: center;
+  color: var(--pico-muted-color);
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+
+/* ===== Feedback Messages ===== */
+.feedback {
+  min-height: 2rem;
+  margin-bottom: 1rem;
+  text-align: center;
+  font-weight: 600;
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
+}
+
+.feedback.correct {
+  color: var(--success);
+}
+
+.feedback.incorrect {
+  color: var(--warning);
+}
+
+/* ===== Buttons ===== */
+.replay-btn,
+.show-answer-btn {
+  width: 100%;
+  margin-bottom: 0.8rem;
+}
+
+.replay-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.show-answer-btn {
+  background: var(--pico-secondary-background);
+  color: var(--pico-color);
+  border: 1px solid var(--pico-muted-border-color);
+}
+
+.show-answer-btn:hover:not(.visible) {
+  background: var(--pico-secondary-hover-background);
+}
+
+.show-answer-btn.visible {
+  background: var(--pico-primary);
+  color: white;
+  border-color: var(--pico-primary);
+}
+
+/* ===== Statistics ===== */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--pico-muted-border-color);
+}
+
+.stat {
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--pico-primary);
+  margin-bottom: 0.5rem;
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  color: var(--pico-muted-color);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.reset-btn {
+  grid-column: 1 / -1;
+  background: transparent;
+  border: 1px solid var(--pico-muted-border-color);
+  color: var(--pico-muted-color);
+  padding: 0.6rem;
+  font-size: 0.9rem;
+}
+
+.reset-btn:hover {
+  background: var(--pico-secondary-hover-background);
+  border-color: var(--pico-color);
+  color: var(--pico-color);
+}
+
+/* ===== Mobile Adjustments ===== */
+@media (max-width: 576px) {
+  .container {
+    padding: 1.5rem;
+  }
+  
+  .range-btn {
+    padding: 1rem 1.2rem;
+    font-size: 1rem;
+  }
+  
+  .stat-value {
+    font-size: 1.5rem;
+  }
+}

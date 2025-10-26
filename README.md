@@ -1,93 +1,165 @@
-# Japanese Number Listening Practice
+# Japanese Listening Practice App
 
-A web-based app for practicing Japanese number listening comprehension using Google Cloud Neural2 text-to-speech voices.
+A modern web app for practicing Japanese listening comprehension with numbers and currency using high-quality Google Cloud Neural2 text-to-speech.
 
-**🎯 [Try it now!](https://arwiester.github.io/japanese-listening-app/japanese-numbers.html)**
+**🎯 [Try it now!](https://arwiester.github.io/japanese-listening-app/)**
 
 ## Features
 
-- 🎧 High-quality Neural2 Japanese TTS (8 voice variations)
-- 📊 Four difficulty levels: 0-10, 0-100, 0-1000, 0-10000
-- 📱 Mobile-optimized with numeric keypad
-- ✅ Auto-grading with encouraging feedback
-- 💾 Persistent statistics tracking
-- 🔊 Audio caching for faster playback
-- 🔀 Random number generation
-- 🔒 Secure API key handling via Cloudflare Workers
+### 🎧 Numbers Practice
+- Four difficulty levels: 0-10, 0-100, 0-1,000, 0-10,000
+- High-quality Neural2 Japanese TTS voices
+- Auto-grading with instant feedback
+- Real-time statistics tracking
+
+### 💴 Currency Practice
+- Four realistic yen ranges:
+  - ¥1 - ¥999 (convenience store purchases)
+  - ¥1,000 - ¥10,000 (restaurant meals)
+  - ¥10,000 - ¥100,000 (electronics, clothing)
+  - ¥100,000 - ¥1,000,000 (major purchases)
+- Smart rounding for realistic amounts
+- Handles ¥ symbols and comma formatting
+
+### 🎨 Modern Design
+- Mobile-first responsive design
+- Light/dark mode support
+- Clean, distraction-free interface
+- Built with Pico.css for modern aesthetics
+- Calming educational color scheme (research-backed)
+
+### 🔒 Secure & Fast
+- Cloudflare Workers proxy for API security
+- Audio caching for faster playback
+- Persistent statistics with localStorage
+- Zero dependencies (vanilla JS)
 
 ## How to Use
 
-1. **[Open the app](https://arwiester.github.io/japanese-listening-app/japanese-numbers.html)**
-2. Select your difficulty level (0-10, 0-100, 0-1000, or 0-10000)
-3. Click the play button to hear a random Japanese number
-4. Type the number you heard
-5. Get instant feedback and move to the next number!
+1. **[Open the app](https://arwiester.github.io/japanese-listening-app/)**
+2. Choose a section: Numbers or Currency
+3. Select your difficulty level
+4. Click a range button to hear audio
+5. Type what you hear
+6. Get instant feedback and continue!
 
-Works on desktop and mobile devices. No installation required!
+Works perfectly on desktop and mobile devices. No installation required!
 
 ## For Developers
 
 ### Architecture
 
-The app uses a serverless architecture for security:
+**Tech Stack:**
+- **Frontend:** Vanilla JavaScript ES6 modules, Pico.css
+- **Routing:** Hash-based SPA router
+- **Testing:** Vitest (121 tests, 80%+ coverage)
+- **TTS:** Google Cloud Neural2 Japanese voices
+- **Security:** Cloudflare Workers API proxy
 
+**Project Structure:**
 ```
-Browser → Cloudflare Worker (proxy) → Google Cloud TTS API
+japanese-listening-app/
+├── index.html                 # SPA entry point
+├── js/
+│   ├── NumberPractice.js     # Numbers section logic
+│   ├── CurrencyPractice.js   # Currency section logic
+│   ├── audioService.js       # TTS integration
+│   ├── router.js             # SPA routing
+│   ├── config.js             # App configuration
+│   ├── utils.js              # Shared utilities
+│   └── sections/             # Section loaders
+├── css/
+│   ├── variables-pico.css    # Design tokens
+│   ├── components-pico.css   # Custom components
+│   └── navigation-pico.css   # SPA navigation
+└── tests/                    # Vitest unit tests
 ```
-
-The Google Cloud API key is stored securely as an encrypted environment variable in Cloudflare Workers, never exposed to users.
 
 ### Local Development
 
-If you want to run this locally:
-
-**Option 1: Python Server**
+**Install dependencies:**
 ```bash
-python3 serve.py
-# Open http://localhost:8000/japanese-numbers.html
+npm install
 ```
 
-**Option 2: Node.js Server**
+**Run tests:**
 ```bash
+npm test          # Run once
+npm run test:ui   # Interactive UI
+```
+
+**Local server:**
+```bash
+# Python
+python3 -m http.server 8000
+
+# Node.js
 npx http-server
-# Open http://localhost:8080/japanese-numbers.html
 ```
 
-### Tech Stack
+### Testing
 
-- Vanilla JavaScript (no dependencies)
-- Google Cloud Text-to-Speech API (Neural2 voices)
-- Cloudflare Workers (secure API proxy)
-- Responsive CSS with mobile-first design
-- LocalStorage for statistics persistence
+The app has comprehensive test coverage (121 tests):
+- NumberPractice: 34 tests
+- CurrencyPractice: 39 tests
+- Router: 18 tests
+- Utils: 16 tests
+- StatsService: 14 tests
+
+Run `npm test` to verify all functionality.
+
+### Deployment
+
+**GitHub Pages:**
+- Automatic deployment on push to main
+- Served from root directory
+- URL: `https://arwiester.github.io/japanese-listening-app/`
+
+**Cloudflare Worker:**
+- Proxy for Google Cloud TTS API
+- Encrypted API key in environment variables
+- Code in `cloudflare-worker.js`
 
 ### Cost
 
-- **Google Cloud TTS Neural2**: 1M free characters/month, then $16/1M
-- **Cloudflare Workers**: 100,000 free requests/day
-- **For personal use**: ~$0/month (well within free tiers)
+- **Google Cloud TTS Neural2:** 1M free characters/month, then $16/1M
+- **Cloudflare Workers:** 100,000 free requests/day
+- **GitHub Pages:** Free for public repos
+- **For personal use:** $0/month (within free tiers)
 
-## Deployment
+## Roadmap
 
-This app is deployed via GitHub Pages and uses Cloudflare Workers for secure API proxying.
+### ✅ Completed
+- ✅ Numbers practice (0-10,000)
+- ✅ Dark mode toggle
+- ✅ Currency practice (¥1-¥1,000,000)
+- ✅ SPA architecture
+- ✅ Comprehensive unit tests
+- ✅ Mobile-first responsive design
 
-The Cloudflare Worker code is in `cloudflare-worker.js`.
+### 🚧 In Progress
+- [ ] Vocabulary practice section
 
-## Future Enhancements
-
+### 🔮 Future Ideas
+- [ ] N5-N3 vocabulary word lists
+- [ ] Themed categories (colors, food, animals)
 - [ ] Keyboard shortcuts (Space to replay, N for next)
-- [ ] Dark mode toggle
 - [ ] Visual progress indicators
-- [ ] N5-N3 vocabulary practice
-- [ ] Themed word categories (colors, food, etc.)
 - [ ] Speech recognition for pronunciation practice
 - [ ] Spaced repetition algorithm
+- [ ] Export/import statistics
+
+## Contributing
+
+This is a personal learning project, but suggestions and feedback are welcome! Feel free to:
+- Open issues for bugs or feature requests
+- Fork and adapt for your own language learning
+- Share with other Japanese learners
 
 ## License
 
-This project is for educational purposes. Feel free to fork and adapt for your own language learning projects!
+Educational use. Free to fork and adapt for language learning projects!
 
 ---
 
 Built with ❤️ for Japanese language learners
- 

@@ -1,0 +1,145 @@
+/* Bottom Navigation - Mobile First */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--bg-surface);
+  border-top: 1px solid var(--border-primary);
+  display: flex;
+  justify-content: space-around;
+  padding: 8px 0 max(8px, env(safe-area-inset-bottom));
+  z-index: 1000;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.bottom-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  flex: 1;
+  padding: 8px;
+  text-decoration: none;
+  color: var(--text-secondary);
+  transition: all 0.2s ease;
+  cursor: pointer;
+  border-radius: 8px;
+  margin: 0 4px;
+  background: transparent;
+  border: none;
+  font-family: inherit;
+}
+
+.bottom-nav-item:hover {
+  background: var(--accent-primary-light);
+  color: var(--accent-primary);
+}
+
+.bottom-nav-item.active {
+  color: var(--accent-primary);
+  background: var(--accent-primary-light);
+}
+
+.bottom-nav-icon {
+  font-size: 24px;
+  line-height: 1;
+}
+
+.bottom-nav-label {
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.02em;
+}
+
+/* Main content area - account for bottom nav */
+.app-container {
+  padding-bottom: 80px; /* Space for bottom nav */
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 20px;
+}
+
+/* Ensure container class works within app */
+.app-container .container {
+  margin: 0 20px;
+}
+
+/* Desktop - side navigation instead */
+@media (min-width: 768px) {
+  .bottom-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: auto;
+    width: 200px;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding: 20px 10px;
+    border-top: none;
+    border-right: 1px solid var(--border-primary);
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+  }
+
+  .bottom-nav-item {
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 12px;
+    width: 100%;
+    padding: 12px;
+    margin: 4px 0;
+  }
+
+  .bottom-nav-label {
+    font-size: 14px;
+  }
+
+  .app-container {
+    margin-left: 200px;
+    padding-bottom: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding-top: 20px;
+  }
+  
+  .app-container .container {
+    margin: 0 20px;
+  }
+}
+
+/* Dark mode adjustments */
+[data-theme="dark"] .bottom-nav {
+  background: var(--bg-surface);
+  border-color: var(--border-primary);
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .bottom-nav-item:hover {
+  background: var(--accent-primary-light);
+}
+
+[data-theme="dark"] .bottom-nav-item.active {
+  background: var(--accent-primary-light);
+}
+
+/* Smooth section transitions */
+.section-container {
+  animation: fadeIn 0.2s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

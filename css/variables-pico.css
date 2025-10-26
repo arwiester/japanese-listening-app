@@ -1,0 +1,78 @@
+/**
+ * Custom Design Tokens
+ * Overrides Pico.css defaults with our Japanese learning app colors
+ */
+
+:root {
+  /* Override Pico's primary color with our trust blue */
+  --pico-primary: #4A90E2;
+  --pico-primary-hover: #3B7BC9;
+  --pico-primary-focus: #EFF6FF;
+  
+  /* Background gradient for body */
+  --bg-gradient-start: #4A90E2;
+  --bg-gradient-end: #5BA3D9;
+  
+  /* Success colors (for correct answers) */
+  --success: #52C41A;
+  --success-bg: #F6FFED;
+  --success-hover: #43A047;
+  
+  /* Warning colors (for incorrect answers) */
+  --warning: #FFA940;
+  --warning-bg: #FFF7E6;
+  
+  /* Container styling */
+  --container-max-width: 600px;
+  --radius-lg: 16px;
+  --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.15);
+  
+  /* Play button */
+  --play-button-size: 100px;
+  
+  /* Font sizes for Japanese text */
+  --font-size-japanese: 1.6em;
+  --font-size-2xl: 32px;
+}
+
+/* Dark mode overrides */
+[data-theme="dark"] {
+  --pico-primary: #60A5FA;
+  --pico-primary-hover: #3B82F6;
+  
+  --bg-gradient-start: #374B6B;
+  --bg-gradient-end: #4A6791;
+  
+  --success: #73D13D;
+  --success-bg: rgba(115, 209, 61, 0.1);
+  
+  --warning: #FFB84D;
+  --warning-bg: rgba(255, 184, 77, 0.1);
+  
+  /* Override Pico's dark card background - slightly lighter to match prod visual */
+  --pico-background-color: #3D4654;  /* Between #374151 and #4B5563 */
+  --pico-card-background-color: #3D4654;
+  
+  /* Lighter disabled input - match prod */
+  --pico-form-element-disabled-opacity: 1;
+  --pico-form-element-disabled-background-color: #4F5968;
+}
+
+/* Body gradient background */
+body {
+  background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+  min-height: 100vh;
+}
+
+/* Override Pico's container to match our design */
+main.container {
+  max-width: var(--container-max-width);
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  :root {
+    --play-button-size: 80px;
+    --font-size-2xl: 28px;
+  }
+}

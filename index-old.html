@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="description" content="Practice Japanese number listening comprehension with high-quality Neural2 text-to-speech voices">
+  <meta name="keywords" content="Japanese, numbers, listening, practice, learning, JLPT">
+  <title>すうじ - Number Practice</title>
+  
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎧</text></svg>">
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/variables.css?v=2">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css?v=2">
+  <link rel="stylesheet" href="shared/css/theme-toggle.css">
+</head>
+<body>
+  <!-- Theme Toggle -->
+  <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+    <span class="theme-icon">🌙</span>
+  </button>
+
+  <div class="container">
+<header style="text-align: center; margin-bottom: 30px;">
+  <div style="font-size: 1.6em; color: var(--text-primary); margin-bottom: 5px;">すうじ</div>
+  <h1 style="margin: 0;">🎧 Numbers</h1>
+</header>
+
+    <!-- Difficulty Selection -->
+    <section class="range-selector">
+      <button class="range-btn active" data-range="10">▶ 0 — 10</button>
+      <button class="range-btn" data-range="100">▶ 0 — 100</button>
+      <button class="range-btn" data-range="1000">▶ 0 — 1,000</button>
+      <button class="range-btn" data-range="10000">▶ 0 — 10,000</button>
+    </section>
+
+    <!-- Answer Input -->
+    <section class="input-area">
+      <div class="feedback" id="feedback"></div>
+      <input 
+        type="text" 
+        id="answer-input"
+        class="answer-input"
+        inputmode="numeric" 
+        pattern="[0-9]*"
+        placeholder="Type number"
+        autocomplete="off"
+        maxlength="2"
+        disabled
+        aria-label="Answer input"
+      >
+      <div class="hint" id="input-hint">💡 Play the audio first!</div>
+      
+      <button class="replay-btn" id="replay-btn" disabled>🔊 Replay Audio</button>
+      <!-- <button class="next-btn" id="next-btn" disabled>🔀 Next Random Number</button> -->
+      <button class="show-answer-btn" id="show-answer-btn">💡 Show Answer & Continue</button>
+    </section>
+
+    <!-- Statistics -->
+    <section class="stats">
+      <div class="stat">
+        <div class="stat-value" id="correct-count">0</div>
+        <div class="stat-label">Correct</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value" id="total-count">0</div>
+        <div class="stat-label">Total</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value" id="accuracy">0%</div>
+        <div class="stat-label">Accuracy</div>
+      </div>
+      <button class="reset-btn" id="reset-btn">🔄 Reset Stats</button>
+    </section>
+  </div>
+
+  <!-- JavaScript Modules -->
+  <script type="module">
+    import NumberPractice from './js/NumberPractice.js';
+    import themeManager from './shared/js/themeManager.js';
+
+    // Initialize theme
+    themeManager.init();
+
+    // Theme toggle handler
+    const themeToggle = document.getElementById('theme-toggle');
+    const themeIcon = document.querySelector('.theme-icon');
+    
+    function updateIcon() {
+      themeIcon.textContent = themeManager.currentTheme === 'dark' ? '☀️' : '🌙';
+    }
+    
+    themeToggle.addEventListener('click', () => {
+      themeManager.toggle();
+      updateIcon();
+    });
+    
+    updateIcon();
+
+    // Initialize app
+    const initApp = async () => {
+      try {
+        const app = new NumberPractice();
+        await app.init();
+      } catch (error) {
+        console.error('Failed to initialize app:', error);
+        alert('Failed to initialize the app. Please refresh the page.');
+      }
+    };
+
+    // Start when DOM is ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initApp);
+    } else {
+      initApp();
+    }
+  </script>
+</body>
+</html>
