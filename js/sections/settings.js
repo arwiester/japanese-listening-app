@@ -97,15 +97,22 @@ async function loadSettingsSection(container) {
             <p style="color: var(--text-primary); margin-bottom: 18px; font-size: 0.95em; line-height: 1.5;">
               Love the app? Support continued development and help keep it free for everyone!
             </p>
+            
+            <!-- Ko-fi Button using CDN badge -->
             <a 
-              href="https://ko-fi.com/J3J2R8EOV"
-              target="_blank"
-              rel="noopener noreferrer"
-              style="display: inline-block; padding: 16px 32px; background: #13C3FF; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 1.05em; transition: all 0.2s; box-shadow: 0 4px 6px rgba(19, 195, 255, 0.4); text-decoration: none; text-transform: uppercase; letter-spacing: 0.5px;"
-              onmouseover="this.style.background='#0FA8E0'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 12px rgba(19, 195, 255, 0.5)'"
-              onmouseout="this.style.background='#13C3FF'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px rgba(19, 195, 255, 0.4)'">
-              ☕ Buy Me a Coffee
+              href="https://ko-fi.com/J3J2R8EOV" 
+              target="_blank" 
+              id="kofi-button"
+              style="display: inline-block; transition: all 0.2s ease; text-decoration: none;"
+            >
+              <img 
+                src="https://storage.ko-fi.com/cdn/kofi3.png?v=3" 
+                alt="Support this project at ko-fi.com" 
+                id="kofi-image"
+                style="height: 36px; border: 0; transition: transform 0.2s ease;"
+              >
             </a>
+            
             <p style="color: var(--text-secondary); margin: 16px 0 0 0; font-size: 0.85em; line-height: 1.4;">
               100% of tips go to development • No fees • Completely optional
             </p>
@@ -176,6 +183,18 @@ async function loadSettingsSection(container) {
       submitButton.style.cursor = 'pointer';
       submitButton.textContent = '📤 Send Bug Report';
     }
+  });
+  
+  // Add Ko-fi button hover animation
+  const kofiButton = document.getElementById('kofi-button');
+  const kofiImage = document.getElementById('kofi-image');
+  
+  kofiButton.addEventListener('mouseenter', () => {
+    kofiImage.style.transform = 'scale(1.1) translateY(-2px)';
+  });
+  
+  kofiButton.addEventListener('mouseleave', () => {
+    kofiImage.style.transform = 'scale(1) translateY(0)';
   });
   
   console.log('Settings section loaded');
