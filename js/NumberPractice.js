@@ -62,7 +62,6 @@ class NumberPractice {
   cacheElements() {
     this.elements = {
       // Buttons
-      playBtn: document.getElementById('play-btn'),
       replayBtn: document.getElementById('replay-btn'),
       // nextBtn: document.getElementById('next-btn'),
       showAnswerBtn: document.getElementById('show-answer-btn'),
@@ -101,7 +100,6 @@ class NumberPractice {
     });
     
     // Play buttons
-    this.elements.playBtn.addEventListener('click', () => this.playNumber());
     this.elements.replayBtn.addEventListener('click', () => this.playNumber(true));
     // this.elements.nextBtn.addEventListener('click', () => this.nextRandom());
     this.elements.showAnswerBtn.addEventListener('click', () => this.showAnswerAndContinue());
@@ -123,8 +121,8 @@ class NumberPractice {
     this.currentRange = range;
     this.setActiveRangeButton(range);
     this.generateNumber();
+    this.playNumber(); // Auto-play when range selected
     this.clearFeedback();
-    this.disableInteractiveElements();
   }
 
   /**
@@ -240,9 +238,6 @@ class NumberPractice {
   async playNumber(replay = false) {
     if (this.currentNumber === null) return;
     
-    // Visual feedback
-    this.elements.playBtn.classList.add('playing');
-    
     try {
       // Determine which TTS to use
       let useCloud = this.voiceMode === VOICE_MODES.CLOUD_TTS;
@@ -267,8 +262,6 @@ class NumberPractice {
       await this.audioService.playWebSpeechAPI(this.currentNumber);
       this.hasPlayedCurrent = true;
       this.enableInteractiveElements();
-    } finally {
-      this.elements.playBtn.classList.remove('playing');
     }
   }
 

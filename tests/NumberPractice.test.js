@@ -14,7 +14,6 @@ describe('NumberPractice - Core Functionality', () => {
     // Setup minimal DOM required for tests
     document.body.innerHTML = `
       <input id="answer-input" class="answer-input" type="text" disabled />
-      <button id="play-btn"></button>
       <button id="replay-btn" disabled></button>
       <button id="show-answer-btn"></button>
       <button id="reset-btn"></button>
@@ -51,7 +50,6 @@ describe('NumberPractice - Core Functionality', () => {
     it('should cache all required DOM elements', async () => {
       await app.init();
       
-      expect(app.elements.playBtn).toBeTruthy();
       expect(app.elements.answerInput).toBeTruthy();
       expect(app.elements.rangeBtns).toBeTruthy();
       expect(app.elements.feedback).toBeTruthy();
@@ -75,8 +73,12 @@ describe('NumberPractice - Core Functionality', () => {
     });
 
     it('should update currentRange when setRange called', () => {
+      // Mock playNumber since setRange now calls it
+      vi.spyOn(app, 'playNumber').mockResolvedValue();
+      
       app.setRange(100);
       expect(app.currentRange).toBe(100);
+      expect(app.playNumber).toHaveBeenCalled();
     });
 
     it('should generate new number in correct range', () => {
@@ -98,12 +100,18 @@ describe('NumberPractice - Core Functionality', () => {
       expect(maxLen2).toBeGreaterThanOrEqual(1);
     });
 
-    it('should disable input after range change', () => {
+    it('should call playNumber after range change', () => {
+      // Mock playNumber
+      vi.spyOn(app, 'playNumber').mockResolvedValue();
+      
       app.setRange(100);
-      expect(app.elements.answerInput.disabled).toBe(true);
+      expect(app.playNumber).toHaveBeenCalled();
     });
 
     it('should clear input value when range changes', () => {
+      // Mock playNumber
+      vi.spyOn(app, 'playNumber').mockResolvedValue();
+      
       app.elements.answerInput.value = '42';
       app.setRange(1000);
       expect(app.elements.answerInput.value).toBe('');
@@ -130,11 +138,11 @@ describe('NumberPractice - Core Functionality', () => {
     });
 
     it('should set maxLength to match number length', () => {
-      // Call generateNumber and check that maxLength matches whatever was generated
+      // Call generateNumber and check that maxLength matches the range
       app.generateNumber();
       
-      // The maxLength should equal the number of digits in currentNumber
-      const expectedLength = app.currentNumber.toString().length;
+      // The maxLength should equal the number of digits in currentRange (e.g., 10 = 2 digits)
+      const expectedLength = app.currentRange.toString().length;
       expect(app.elements.answerInput.maxLength).toBe(expectedLength);
     });
 

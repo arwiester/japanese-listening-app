@@ -115,14 +115,14 @@
   --accent-primary-light: #2C4A6E;
   
   /* Success */
-  --success: #73D13D;
-  --success-bg: #1F3A1F;
-  --success-hover: #52C41A;
+  --success: #10B981;            /* Medium green for border */
+  --success-bg: #F6FFED;         /* Same as light mode - input is white anyway */
+  --success-hover: #16A34A;
   --success-light: #3D5C3D;
   
   /* Warning */
-  --warning: #FFB84D;
-  --warning-bg: #3A2F1F;
+  --warning: #FB923C;            /* Softer orange for dark mode */
+  --warning-bg: #FFF7E6;         /* Same as light mode - input is white anyway */
   
   /* Info/Hint */
   --info: #69B1FF;
