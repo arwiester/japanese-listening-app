@@ -19,6 +19,7 @@
   transition: all var(--transition-base);
   box-shadow: var(--shadow-sm);
   z-index: 1000;
+  color: var(--text-primary); /* FIX: Force icon color */
 }
 
 .theme-toggle:hover {
@@ -36,6 +37,7 @@
   align-items: center;
   justify-content: center;
   pointer-events: none;
+  color: inherit; /* FIX: Inherit from button */
 }
 
 @media (max-width: 768px) {

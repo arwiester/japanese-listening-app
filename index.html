@@ -5,80 +5,95 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="description" content="Practice Japanese listening comprehension - numbers, currency, and vocabulary">
   <meta name="keywords" content="Japanese, learning, listening, practice, JLPT, numbers, currency, vocabulary">
-  <title>Japanese Practice - 日本語練習</title>
+  <title>日本語聴解練習 | Japanese Listening Practice</title>
   
-  <!-- Favicon -->
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎧</text></svg>">
+  <!-- Favicon - Japanese Flag -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🇯🇵</text></svg>">
   
   <!-- Initialize theme BEFORE Pico loads to prevent flash -->
   <script>
-    // Apply saved theme immediately (before Pico.css loads)
     const savedTheme = localStorage.getItem('japanese-learning-theme') || 'light';
     document.documentElement.setAttribute('data-theme', savedTheme);
   </script>
   
-  <!-- Pico.css - Modern baseline styling -->
+  <!-- Pico.css -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
   
-  <!-- Custom CSS (overrides Pico where needed) -->
+  <!-- Phosphor Icons - Fill weight for navigation -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css">
+<!-- Phosphor Icons - Bold weight for theme toggle (thick strokes, better visibility) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/bold/style.css">
+
+  <!-- Custom CSS -->
   <link rel="stylesheet" href="css/variables-pico.css">
   <link rel="stylesheet" href="css/components-pico.css">
   <link rel="stylesheet" href="css/navigation-pico.css">
   <link rel="stylesheet" href="shared/css/theme-toggle.css">
 </head>
 <body>
-  <!-- Theme Toggle -->
+  <!-- Theme Toggle with Phosphor Icons -->
   <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
-    <span class="theme-icon">🌙</span>
-  </button>
+  <i class="ph-bold ph-sun theme-icon sun-icon"></i>
+  <i class="ph-bold ph-moon theme-icon moon-icon" style="display: none;"></i>
+</button>
 
   <!-- Main App Container -->
   <div class="app-container">
-    <!-- Section content loads here -->
     <div id="app-content"></div>
   </div>
 
-  <!-- Bottom Navigation -->
+  <!-- Bottom Navigation with Phosphor Icons -->
   <nav class="bottom-nav">
     <button class="bottom-nav-item active" data-route="numbers" aria-label="Numbers practice">
-      <span class="bottom-nav-icon">🔢</span>
+      <i class="ph-fill ph-hash bottom-nav-icon"></i>
       <span class="bottom-nav-label">Numbers</span>
     </button>
     
     <button class="bottom-nav-item" data-route="currency" aria-label="Currency practice">
-      <span class="bottom-nav-icon">💴</span>
+      <i class="ph-fill ph-currency-jpy bottom-nav-icon"></i>
       <span class="bottom-nav-label">Currency</span>
     </button>
     
     <button class="bottom-nav-item" data-route="vocabulary" aria-label="Vocabulary practice">
-      <span class="bottom-nav-icon">📚</span>
+      <i class="ph-fill ph-translate bottom-nav-icon"></i>
       <span class="bottom-nav-label">Vocabulary</span>
     </button>
     
-    <button class="bottom-nav-item" data-route="settings" aria-label="Settings">
-      <span class="bottom-nav-icon">⚙️</span>
-      <span class="bottom-nav-label">Settings</span>
+    <button class="bottom-nav-item" data-route="settings" aria-label="Info and settings">
+      <i class="ph-fill ph-info bottom-nav-icon"></i>
+      <span class="bottom-nav-label">Info</span>
     </button>
   </nav>
 
   <!-- Core Scripts -->
   <script src="js/router.js"></script>
   <script type="module">
-    // Initialize theme first
+    // Initialize theme
     import themeManager from './shared/js/themeManager.js';
     themeManager.init();
     
-    // Setup theme toggle button
+    // Setup theme toggle
     const themeToggle = document.getElementById('theme-toggle');
-    const themeIcon = document.querySelector('.theme-icon');
+    const sunIcon = document.querySelector('.sun-icon');
+    const moonIcon = document.querySelector('.moon-icon');
+    
+    function updateThemeIcon() {
+      const currentTheme = themeManager.currentTheme;
+      if (currentTheme === 'dark') {
+        sunIcon.style.display = 'block';
+        moonIcon.style.display = 'none';
+      } else {
+        sunIcon.style.display = 'none';
+        moonIcon.style.display = 'block';
+      }
+    }
     
     themeToggle.addEventListener('click', () => {
-      const newTheme = themeManager.toggle();
-      themeIcon.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+      themeManager.toggle();
+      updateThemeIcon();
     });
     
-    // Set initial icon
-    themeIcon.textContent = themeManager.currentTheme === 'dark' ? '☀️' : '🌙';
+    updateThemeIcon();
   </script>
   
   <!-- Section Scripts -->
@@ -89,16 +104,13 @@
   
   <!-- Initialize App -->
   <script>
-    // Register routes FIRST (before init)
     router.addRoute('numbers', loadNumbersSection);
     router.addRoute('currency', loadCurrencySection);
     router.addRoute('vocabulary', loadVocabularySection);
     router.addRoute('settings', loadSettingsSection);
     
-    // NOW initialize router with container
     router.init('app-content');
     
-    // Setup navigation clicks
     document.querySelectorAll('.bottom-nav-item').forEach(item => {
       item.addEventListener('click', () => {
         const route = item.getAttribute('data-route');
