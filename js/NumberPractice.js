@@ -5,8 +5,6 @@
 import {
   DIFFICULTY_RANGES,
   ENCOURAGEMENT_MESSAGES,
-  VOICE_MODES,
-  STORAGE_KEYS,
   DEFAULTS,
   TIMINGS,
   ATTEMPTS_BEFORE_HINT
@@ -22,7 +20,6 @@ class NumberPractice {
     this.currentRange = DEFAULTS.RANGE;
     this.attemptCount = 0;
     this.hasPlayedCurrent = false;
-    this.voiceMode = DEFAULTS.VOICE_MODE;
     
     // Services
     this.audioService = new AudioService();
@@ -64,7 +61,7 @@ class NumberPractice {
       // Buttons
       playBtn: document.getElementById('play-btn'),
       replayBtn: document.getElementById('replay-btn'),
-      // nextBtn: document.getElementById('next-btn'),
+      nextBtn: document.getElementById('next-btn'),
       showAnswerBtn: document.getElementById('show-answer-btn'),
       resetBtn: document.getElementById('reset-btn'),
       
@@ -82,8 +79,7 @@ class NumberPractice {
       
       // Selectors
       rangeBtns: document.querySelectorAll('.range-btn'),
-      voiceModeBtns: document.querySelectorAll('.voice-mode-btn')
-    };
+        };
   }
 
   /**
@@ -94,22 +90,18 @@ class NumberPractice {
     this.elements.rangeBtns.forEach(btn => {
       btn.addEventListener('click', (e) => this.setRange(parseInt(e.target.dataset.range)));
     });
-    
-    // Voice mode selection
-    this.elements.voiceModeBtns.forEach(btn => {
-      btn.addEventListener('click', (e) => this.setVoiceMode(e.target.dataset.mode));
-    });
+
     
     // Play buttons
     this.elements.playBtn.addEventListener('click', () => this.playNumber());
     this.elements.replayBtn.addEventListener('click', () => this.playNumber(true));
-    // this.elements.nextBtn.addEventListener('click', () => this.nextRandom());
+    this.elements.nextBtn.addEventListener('click', () => this.nextRandom());
     this.elements.showAnswerBtn.addEventListener('click', () => this.showAnswerAndContinue());
     this.elements.resetBtn.addEventListener('click', () => this.resetStats());
     
-    // Input handling with debounce
+    // Input handling with debounce - FIXED: Use currentNumber length instead of currentRange
     this.elements.answerInput.addEventListener('input', debounce(() => {
-      const expectedLength = this.currentRange.toString().length;
+      const expectedLength = this.currentNumber.toString().length;
       if (this.elements.answerInput.value.length >= expectedLength) {
         this.checkAnswer();
       }
@@ -140,53 +132,7 @@ class NumberPractice {
     });
   }
 
-  /**
-   * Set voice mode
-   */
-  setVoiceMode(mode) {
-    this.voiceMode = mode;
-    this.setActiveVoiceModeButton(mode);
-    this.saveVoiceMode();
-  }
-
-  /**
-   * Set active voice mode button
-   */
-  setActiveVoiceModeButton(mode) {
-    this.elements.voiceModeBtns.forEach(btn => {
-      if (btn.dataset.mode === mode) {
-        btn.classList.add('active');
-      } else {
-        btn.classList.remove('active');
-      }
-    });
-  }
-
-  /**
-   * Save voice mode preference
-   */
-  saveVoiceMode() {
-    try {
-      localStorage.setItem(STORAGE_KEYS.VOICE_MODE, this.voiceMode);
-    } catch (error) {
-      console.error('Error saving voice mode:', error);
-    }
-  }
-
-  /**
-   * Load voice mode preference
-   */
-  loadVoiceMode() {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEYS.VOICE_MODE);
-      if (saved) {
-        this.voiceMode = saved;
-      }
-    } catch (error) {
-      console.error('Error loading voice mode:', error);
-    }
-  }
-
+ 
   /**
    * Generate new random number
    */
@@ -400,7 +346,7 @@ class NumberPractice {
     this.elements.answerInput.disabled = false;
     this.elements.answerInput.focus();
     this.elements.replayBtn.disabled = false;
-    // this.elements.nextBtn.disabled = false;
+    this.elements.nextBtn.disabled = false;
     this.elements.inputHint.textContent = 'Answer will auto-check when complete';
   }
 
@@ -410,7 +356,7 @@ class NumberPractice {
   disableInteractiveElements() {
     this.elements.answerInput.disabled = true;
     this.elements.replayBtn.disabled = true;
-    // this.elements.nextBtn.disabled = true;
+    this.elements.nextBtn.disabled = true;
     this.elements.inputHint.textContent = '💡 Play the audio first!';
   }
 }
