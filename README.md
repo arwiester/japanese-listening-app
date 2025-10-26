@@ -90,3 +90,4 @@ This project is for educational purposes. Feel free to fork and adapt for your o
 ---
 
 Built with ❤️ for Japanese language learners
+ 
